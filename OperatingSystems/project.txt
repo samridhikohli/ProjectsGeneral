@@ -1,0 +1,237 @@
+#include <pthread.h>
+
+#include <stdio.h>
+
+#include <stdlib.h>
+
+
+
+#define SIZE 10
+
+#define NUMBER_OF_THREADS 3
+
+
+
+void *sorter(void *params);   
+
+void *merger(void *params);    
+
+
+
+int list[SIZE] = {7,12,19,3,18,4,2,6,15,8};
+
+
+int result[SIZE];
+
+
+
+typedef struct
+
+{
+    	int from_index;
+    
+	int to_index;
+
+
+}parameters;
+
+
+
+
+int main(int argc,char *argv[])
+
+{
+    	int i;
+
+    
+	pthread_t workers[NUMBER_OF_THREADS];
+    
+	parameters *data=(parameters *)malloc(sizeof(parameters));
+    
+	data->from_index=0;
+    
+	data->to_index=(SIZE/2)-1;
+    
+	pthread_create(&workers[0],0,sorter,data);
+
+    
+	
+	data=(parameters *)malloc(sizeof(parameters));
+    
+	data->from_index=(SIZE/2);
+    
+	data->to_index=SIZE-1;
+    
+	pthread_create(&workers[1],0,sorter,data);
+
+    
+	
+	for(i=0;i<NUMBER_OF_THREADS-1;i++)
+    
+	pthread_join(workers[i], NULL);
+
+    
+	
+	data=(parameters *)malloc(sizeof(parameters));
+    
+	data->from_index=0;
+    
+	data->to_index=SIZE-1;
+    
+	pthread_create(&workers[2],0,merger,data);
+    
+	pthread_join(workers[2], NULL);
+
+    	
+	return 0;
+
+}
+
+
+
+void *sorter(void *params)
+
+{
+    	parameters *p =(parameters *)params;
+
+    
+	int i,j,k;
+    
+	int begin=p->from_index;
+    
+	int end=p->to_index+1;
+
+    
+	printf("\nThe array recieved is:\n");
+    
+	for(i=begin;i<end;i++)
+    
+	{	
+       
+		printf("%d\t",list[i]);
+    	
+	}
+
+    
+	printf("\n");
+
+
+    	int temp=0;
+
+
+    	for(i=begin;i<end;i++)
+  
+	{
+
+	        for(j=begin;j<end-1;j++)
+  
+	        {
+
+           
+			 if(list[j]>list[j+1])
+	     
+            {
+                
+				temp = list[j];
+		
+                list[j] = list[j+1];
+		
+                list[j+1] = temp;
+
+	     
+            }
+    
+	        }
+
+       }
+
+ 
+       printf("\nThe sorted array:\n");
+       for(k=begin;k<end;k++)
+
+       {
+          
+		  printf("%d\t",list[k]);
+
+       }
+
+
+       for(i=begin;i<end;i++)
+ 
+       {
+  
+	          result[i] = list[i];
+   
+    }
+    
+    
+       printf("\n");
+
+   
+    pthread_exit(NULL);
+
+
+}
+
+
+
+void *merger(void *params)
+
+{
+    
+	parameters *p=(parameters *)params;
+
+
+    	int i,j,d;
+
+    	int begin=p->from_index;	
+
+    	int end=p->to_index+1;
+
+   
+        int temp=0;
+
+    
+	for(i=begin;i<end;i++)
+ 
+        {
+        
+		for(j=begin;j<end-1;j++)
+
+	        {
+
+            
+			if(result[j]>result[j+1])
+
+	                {
+                
+				temp= result[j];
+		
+                result[j] = result[j+1];
+		
+                result[j+1] = temp;
+
+
+ 	                }
+    
+	        }
+    
+    }
+
+    
+    printf("\n\nFINAL RESULT IS:\n");
+
+        for(d=begin;d<end;d++)
+  
+        {
+        
+		printf("%d\t", result[d]);
+	
+        }
+
+    
+	pthread_exit(NULL);
+
+
+}
+		
